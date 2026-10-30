@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veille · Gabin Clavier</title>
+<meta name="description" content="Récap du jour de ma veille : résumé global et sujets par thème.">
+<meta name="theme-color" content="#06051a">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Grenze+Gotisch:wght@700;900&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="site">
+  <div class="street" aria-hidden="true">
+    <div class="street-canvas" id="street"></div>
+    <div class="street-veil"></div>
+  </div>
+
+  <main class="page">
+    <nav class="site-nav" aria-label="Navigation principale">
+      <span>Veille</span>
+      <div>
+        <a href="#" aria-current="page">Récap</a>
+        <a href="#">Fils</a>
+        <a href="#">Plus tard <span class="saved-count" id="saved-count"></span></a>
+        <a href="#">Sources</a>
+      </div>
+    </nav>
+
+    <header class="masthead">
+      <p class="eyebrow" id="date"></p>
+      <h1 class="title">Veille</h1>
+      <p class="digest" id="digest"></p>
+      <p class="stats" id="stats"></p>
+    </header>
+
+    <nav class="filters" aria-label="Thèmes" id="theme-nav"></nav>
+
+    <div id="themes"></div>
+
+    <footer class="foot">Résumés rédigés par une IA à partir de vos sources. En cas de doute, l’article original fait foi.</footer>
+  </main>
+</div>
+
+<script type="module" src="veille.js"></script>
+<script type="module">
+  import { mount } from './medieval-street.js';
+  try { mount(document.getElementById('street')); }
+  catch (err) { console.error(err); } // sans WebGL, le dégradé de fond reste visible
+</script>
+</body>
+</html>

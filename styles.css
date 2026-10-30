@@ -1,0 +1,212 @@
+/* Codex Nuit : grimoire sous un ciel cosmique (dark fantasy) traversé de néons (cyberpunk) */
+:root {
+  --font-display: "Grenze Gotisch";
+  --font-body: "Chakra Petch";
+  --night: #06051a;      /* fond */
+  --panel: rgb(8 7 34 / 0.82); /* surfaces translucides */
+  --seam: #34338a;       /* bordures */
+  --seam-soft: #24226a;  /* séparateurs de liste */
+  --text: #ecebff;
+  --bright: #f4f1ff;     /* titres de section */
+  --ash: #b9b6e6;        /* texte secondaire */
+  --mist: #c9c6ec;
+  --parchment: #ffeccc;  /* grand titre */
+  --gilt: #ffd36a;       /* or : actions, surtitres */
+  --neon: #ff2fa8;       /* néon rose */
+  --link: #9fb0ff;
+  --hover: #ff7ad0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--night);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--hover); }
+:focus-visible { outline: 2px solid var(--gilt); outline-offset: 3px; }
+
+.site { position: relative; min-height: 100vh; background: var(--night); }
+
+/* Rue médiévale 3D derrière l'en-tête, fondue vers le bas */
+.street {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: max(100vh, 780px);
+  z-index: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #05072e, #1e2fc4 60%, #2a1838);
+  -webkit-mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 72%, transparent 100%);
+}
+.street-canvas { position: absolute; inset: 0; }
+.street-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgb(6 5 26 / 0.82) 0%, rgb(6 5 26 / 0.55) 38%, rgb(6 5 26 / 0) 68%),
+    linear-gradient(180deg, rgb(6 5 26 / 0.35) 0%, rgb(6 5 26 / 0) 30%, rgb(6 5 26 / 0) 70%, rgb(6 5 26 / 0.6) 100%);
+}
+
+.page { position: relative; z-index: 2; max-width: 74rem; margin: 0 auto; padding: 1.25rem 1.25rem 5rem; }
+
+/* Navigation et filtres : soulignement néon pour l'élément actif */
+.site-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.site-nav > span { color: var(--mist); }
+.site-nav div { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; }
+.site-nav a, .filters a { color: var(--ash); padding: 0.3rem 0; border-bottom: 2px solid transparent; }
+.site-nav a:hover, .filters a:hover { color: #fff; }
+.site-nav a[aria-current="page"], .filters a[aria-current="page"] { color: #fff; border-bottom-color: var(--neon); }
+.saved-count { color: var(--gilt); }
+
+/* En-tête : le titre gothique illuminé et le résumé du jour */
+.masthead { padding: 5.5rem 0 0; max-width: 46rem; }
+.eyebrow {
+  margin: 0 0 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--gilt);
+  text-shadow: 2px 2px 0 var(--night);
+}
+.title {
+  font-family: var(--font-display), serif;
+  font-weight: 900;
+  font-size: clamp(4.5rem, 15vw, 8.5rem);
+  line-height: 0.8;
+  margin: 0;
+  color: var(--parchment);
+  text-shadow: 0 0 18px #6d7bff, 0 0 50px #3a3cff, 0 0 90px var(--neon);
+}
+.digest {
+  margin: 2rem 0 0;
+  max-width: 60ch;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #e4e2ff;
+  text-wrap: pretty;
+  text-shadow: 0 2px 0 var(--night), 0 0 14px var(--night);
+}
+.stats { margin: 1.25rem 0 0; font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ash); }
+
+/* Barre des thèmes, collée en haut au défilement */
+.filters {
+  position: sticky;
+  top: 0.5rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0.85rem 1.1rem;
+  margin: 3rem 0 3.5rem;
+  background: var(--panel);
+  border: 1px solid var(--seam);
+  backdrop-filter: blur(4px);
+}
+.filters::-webkit-scrollbar { display: none; }
+.filters a { flex: none; white-space: nowrap; font-size: 0.85rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; }
+
+/* Un thème : lettrine dorée à gauche, sujets numérotés à droite */
+.theme {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem 3rem;
+  margin-bottom: 4.5rem;
+  scroll-margin-top: 5rem;
+}
+.theme-head {
+  flex: 1 1 11rem;
+  position: sticky;
+  top: 5.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.25rem 1rem;
+}
+.theme-glyph {
+  font-family: var(--font-display), serif;
+  font-weight: 900;
+  font-size: 5.5rem;
+  line-height: 0.8;
+  color: var(--gilt);
+  text-shadow: 0 0 16px rgb(255 211 106 / 0.45), 3px 3px 0 var(--night);
+}
+.theme-label { flex: 1 1 7rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.theme h2 {
+  font-family: var(--font-display), serif;
+  font-weight: 700;
+  font-size: 2.2rem;
+  line-height: 1;
+  margin: 0;
+  color: var(--bright);
+  text-shadow: 3px 3px 0 var(--night);
+}
+.theme-meta { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ash); }
+.theme-thread { font-size: 0.85rem; margin-top: 0.2rem; }
+.topics { flex: 999 1 30rem; min-width: 0; border-top: 2px dashed rgb(255 211 106 / 0.35); }
+
+.topic {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: 0 1rem;
+  padding: 1.35rem 0 1rem;
+  border-bottom: 1px solid var(--seam-soft);
+}
+.topic.is-read { opacity: 0.45; }
+.topic-n { font-family: var(--font-display), serif; font-weight: 700; font-size: 1.7rem; line-height: 1; color: var(--gilt); }
+.topic-body { min-width: 0; }
+.topic h3 { margin: 0; font-size: 1.2rem; font-weight: 600; line-height: 1.35; text-wrap: pretty; }
+.topic h3 a { color: #fff; }
+.topic h3 a:hover { color: var(--hover); }
+.topic-sum { margin: 0.5rem 0 0; font-size: 1rem; line-height: 1.6; color: var(--mist); max-width: 62ch; text-wrap: pretty; }
+.topic-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 1rem; margin-top: 0.6rem; }
+.sources { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.75rem; font-size: 0.85rem; }
+.sources span { color: var(--ash); }
+.actions { display: flex; gap: 0.25rem; margin-left: auto; }
+.actions button {
+  font: inherit;
+  background: transparent;
+  border: 0;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ash);
+  cursor: pointer;
+}
+.actions button:hover { color: #fff; }
+.actions .save[aria-pressed="true"] { color: var(--gilt); }
+.actions .save[aria-pressed="false"]:hover { color: var(--gilt); }
+
+.foot { border-top: 1px solid var(--seam); padding-top: 1.5rem; font-size: 0.85rem; color: var(--ash); max-width: 60ch; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .topic { transition: opacity 0.2s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
