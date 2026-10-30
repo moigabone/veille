@@ -1,0 +1,38 @@
+[
+  { "theme": "tech", "name": "Numerama", "url": "https://www.numerama.com/feed/" },
+  { "theme": "tech", "name": "Frandroid", "url": "https://www.frandroid.com/feed" },
+  { "theme": "tech", "name": "Next", "url": "https://next.ink/feed/" },
+  { "theme": "tech", "name": "The Verge", "url": "https://www.theverge.com/rss/index.xml" },
+  { "theme": "tech", "name": "Ars Technica", "url": "https://feeds.arstechnica.com/arstechnica/index" },
+
+  { "theme": "cyber", "name": "CERT-FR", "url": "https://www.cert.ssi.gouv.fr/feed/" },
+  { "theme": "cyber", "name": "Zataz", "url": "https://www.zataz.com/feed/" },
+  { "theme": "cyber", "name": "BleepingComputer", "url": "https://www.bleepingcomputer.com/feed/" },
+  { "theme": "cyber", "name": "The Record", "url": "https://therecord.media/feed" },
+
+  { "theme": "ia", "name": "ActuIA", "url": "https://www.actuia.com/feed/" },
+  { "theme": "ia", "name": "The Decoder", "url": "https://the-decoder.com/feed/" },
+  { "theme": "ia", "name": "Hugging Face", "url": "https://huggingface.co/blog/feed.xml" },
+  { "theme": "ia", "name": "MIT Tech Review", "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed" },
+
+  { "theme": "finance", "name": "Le Figaro Bourse", "url": "https://www.lefigaro.fr/rss/figaro_bourse.xml" },
+  { "theme": "finance", "name": "BFM Bourse", "url": "https://www.tradingsat.com/rssbourse.xml" },
+  { "theme": "finance", "name": "CoinDesk", "url": "https://www.coindesk.com/arc/outboundfeeds/rss/" },
+
+  { "theme": "eco", "name": "franceinfo", "url": "https://www.francetvinfo.fr/economie.rss" },
+  { "theme": "eco", "name": "La Tribune", "url": "https://www.latribune.fr/feed.xml" },
+  { "theme": "eco", "name": "Alternatives Économiques", "url": "https://www.alternatives-economiques.fr/rss.xml" },
+  { "theme": "eco", "name": "Le Monde", "url": "https://www.lemonde.fr/economie/rss_full.xml" },
+
+  { "theme": "politique", "name": "Le Monde", "url": "https://www.lemonde.fr/politique/rss_full.xml", "bord": "centre gauche" },
+  { "theme": "politique", "name": "Libération", "url": "https://www.liberation.fr/arc/outboundfeeds/rss-all/category/politique/?outputType=xml", "bord": "gauche" },
+  { "theme": "politique", "name": "Le Figaro", "url": "https://www.lefigaro.fr/rss/figaro_politique.xml", "bord": "droite" },
+  { "theme": "politique", "name": "franceinfo", "url": "https://www.francetvinfo.fr/politique.rss", "bord": "service public" },
+  { "theme": "politique", "name": "Public Sénat", "url": "https://www.publicsenat.fr/feed", "bord": "parlementaire" },
+
+  { "theme": "monde", "name": "Le Monde", "url": "https://www.lemonde.fr/international/rss_full.xml" },
+  { "theme": "monde", "name": "RFI", "url": "https://www.rfi.fr/fr/rss" },
+  { "theme": "monde", "name": "France 24", "url": "https://www.france24.com/fr/rss" },
+  { "theme": "monde", "name": "BBC", "url": "https://feeds.bbci.co.uk/news/world/rss.xml" },
+  { "theme": "monde", "name": "Courrier international", "url": "https://www.courrierinternational.com/feed/all/rss.xml" }
+]

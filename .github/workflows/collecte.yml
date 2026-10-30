@@ -1,0 +1,35 @@
+name: Collecte du matin
+
+on:
+  schedule:
+    - cron: "30 5 * * *"  # 5 h 30 UTC : 6 h 30 à Paris l'hiver, 7 h 30 l'été (GitHub peut retarder de quelques minutes)
+  workflow_dispatch:
+    inputs:
+      essai:
+        description: "Essai : afficher le résultat sans publier l'édition"
+        type: boolean
+        default: false
+
+concurrency: collecte
+
+jobs:
+  collecte:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: collector
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: collector/package-lock.json
+      - run: npm ci
+      - run: node collect.mjs ${{ inputs.essai && '--essai' || '' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          VEILLE_MODEL: ${{ vars.VEILLE_MODEL }}

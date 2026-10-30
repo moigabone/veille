@@ -24,27 +24,51 @@
     <nav class="site-nav" aria-label="Navigation principale">
       <span>Veille</span>
       <div>
-        <a href="#" aria-current="page">Récap</a>
-        <a href="#">Fils</a>
-        <a href="#">Plus tard <span class="saved-count" id="saved-count"></span></a>
-        <a href="#">Sources</a>
+        <a href="./" data-view="recap">Récap</a>
+        <a href="?vue=plus-tard" data-view="plus-tard">Plus tard <span class="saved-count" id="saved-count"></span></a>
+        <a href="?vue=sources" data-view="sources">Sources</a>
       </div>
     </nav>
 
     <header class="masthead">
-      <p class="eyebrow" id="date"></p>
-      <h1 class="title">Veille</h1>
-      <p class="digest" id="digest"></p>
-      <p class="stats" id="stats"></p>
+      <p class="eyebrow" id="eyebrow"></p>
+      <h1 class="title" id="title">Veille</h1>
+      <p class="digest" id="digest" hidden></p>
+      <p class="stats" id="stats" hidden></p>
     </header>
 
-    <nav class="filters" aria-label="Thèmes" id="theme-nav"></nav>
+    <nav class="filters" aria-label="Thèmes" id="theme-nav" hidden></nav>
 
-    <div id="themes"></div>
+    <div id="content" class="content"></div>
 
-    <footer class="foot">Résumés rédigés par une IA à partir de vos sources. En cas de doute, l’article original fait foi.</footer>
+    <footer class="foot">
+      <p>Résumés rédigés par une IA à partir des titres et chapôs des sources. En cas de doute, l’article original fait foi.</p>
+      <p id="account"><button type="button" class="link-button" id="login-open">Connexion</button></p>
+    </footer>
   </main>
 </div>
+
+<dialog class="login" id="login">
+  <form id="login-email">
+    <h2>Connexion</h2>
+    <p>Pour retrouver tes sujets lus et gardés sur tous tes appareils.</p>
+    <label>Adresse e-mail <input type="email" name="email" required autocomplete="email"></label>
+    <div class="login-actions">
+      <button type="button" class="ghost" data-close>Annuler</button>
+      <button>Recevoir un code</button>
+    </div>
+  </form>
+  <form id="login-code" hidden>
+    <h2>Connexion</h2>
+    <p>Tape le code reçu par e-mail.</p>
+    <label>Code <input name="code" required inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}"></label>
+    <div class="login-actions">
+      <button type="button" class="ghost" data-close>Annuler</button>
+      <button>Se connecter</button>
+    </div>
+  </form>
+  <p class="error" id="login-error" hidden></p>
+</dialog>
 
 <script type="module" src="veille.js"></script>
 <script type="module">
