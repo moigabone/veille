@@ -26,15 +26,15 @@ sous la rue médiévale 3D de la taverne, dans le style « Codex Nuit ».
 ## Mise en route
 
 1. **Supabase** : exécute `supabase/schema.sql` dans le SQL Editor du projet du Codex.
-2. **Clé Claude** : crée une clé API sur platform.claude.com.
+2. **Clé Claude** : crée une clé API sur platform.claude.com, et fixe une limite de dépense mensuelle dans la console (Limits) par sécurité.
 3. **Secrets GitHub** (Settings > Secrets and variables > Actions) :
    `ANTHROPIC_API_KEY`, `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY`
    (Supabase > Project settings > API keys, clé secrète `service_role`, à ne jamais mettre dans le site).
 4. **Premier essai** : onglet Actions > « Collecte du matin » > Run workflow, case « Essai » cochée,
    pour lire le résultat dans le journal sans rien publier. Relance-le ensuite sans la case pour publier.
 
-Le modèle par défaut est Claude Opus 5.5. Pour en changer, crée la variable `VEILLE_MODEL`
-(onglet Variables, à côté des secrets), par exemple `claude-haiku-5-5`, beaucoup moins cher.
+Le modèle par défaut est Claude Haiku 5.5 (environ 0,30 $ par mois ; le journal affiche le coût de chaque collecte). Pour en changer, crée la variable `VEILLE_MODEL`
+(onglet Variables, à côté des secrets), par exemple `claude-sonnet-5-5` (environ 5 $ par mois) ou `claude-opus-5-5` (environ 10 $).
 
 En local : `cd collector`, `npm install`, puis `node collect.mjs --sans-ia` pour tester les flux,
 ou `node collect.mjs --essai` avec `ANTHROPIC_API_KEY` défini pour voir les résumés sans publier.

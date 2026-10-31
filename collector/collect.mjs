@@ -10,7 +10,9 @@ import { z } from "zod";
 
 const DRY_RUN = process.argv.includes("--essai");
 const NO_AI = process.argv.includes("--sans-ia");
-const MODEL = process.env.VEILLE_MODEL || "claude-opus-5-5";
+const MODEL = process.env.VEILLE_MODEL || "claude-haiku-5-5"; // ~0,30 $/mois ; Sonnet 5.5 ~5 $, Opus 5.5 ~10 $
+// Prix en dollars par million de jetons (entrée, sortie), pour afficher le coût de chaque collecte
+const PRICES = { "claude-haiku-5-5": [0.10, 0.50], "claude-sonnet-5-5": [2, 10], "claude-opus-5-5": [4, 20] };
 const WINDOW_HOURS = 26;      // un peu plus qu'une journée, pour ne rien rater entre deux collectes
 const MAX_PER_THEME = 60;     // articles envoyés à l'IA par thème, les plus récents d'abord
 const THEMES = {
@@ -84,7 +86,8 @@ async function collect() {
 // --- Résumés par Claude ---
 
 const anthropic = NO_AI ? null : new Anthropic();
-const FALLBACK = { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" };
+// En cas de refus du modèle, l'API relance sur un autre modèle (pas proposé pour Haiku)
+const FALLBACK = MODEL.includes("haiku") ? {} : { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" };
 const usage = { input: 0, output: 0 };
 const track = r => { usage.input += r.usage.input_tokens; usage.output += r.usage.output_tokens; };
 const checkStop = r => {
@@ -202,7 +205,9 @@ for (const [theme, items] of byTheme) {
 }
 if (!topics.length) throw new Error("Aucun sujet produit, édition non publiée");
 const digest = await writeDigest(topics);
-console.log(`Modèle ${MODEL} · ${usage.input} jetons en entrée, ${usage.output} en sortie`);
+const price = PRICES[MODEL];
+const cost = price ? ` · environ ${((usage.input * price[0] + usage.output * price[1]) / 1e6).toFixed(4)} $` : "";
+console.log(`Modèle ${MODEL} · ${usage.input} jetons en entrée, ${usage.output} en sortie${cost}`);
 
 if (DRY_RUN) {
   console.log(`\n${digest}\n`);
