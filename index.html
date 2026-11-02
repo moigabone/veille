@@ -8,6 +8,8 @@
 <meta name="theme-color" content="#06051a">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="Veille">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600&family=Grenze+Gotisch:wght@700;900&display=swap">
@@ -34,6 +36,7 @@
       <p class="eyebrow" id="eyebrow"></p>
       <h1 class="title" id="title">Veille</h1>
       <p class="digest" id="digest" hidden></p>
+      <button type="button" class="link-button digest-toggle" id="digest-toggle" aria-controls="digest" hidden></button>
       <p class="stats" id="stats" hidden></p>
     </header>
 
@@ -51,7 +54,7 @@
 <dialog class="login" id="login">
   <form id="login-email">
     <h2>Connexion</h2>
-    <p>Pour retrouver tes sujets lus et gardés sur tous tes appareils.</p>
+    <p>La veille est réservée aux invités : entre ton adresse, tu recevras un code par e-mail.</p>
     <label>Adresse e-mail <input type="email" name="email" required autocomplete="email"></label>
     <div class="login-actions">
       <button type="button" class="ghost" data-close>Annuler</button>

@@ -18,21 +18,12 @@ const h = (tag, attrs = {}, ...children) => {
 };
 const plural = (n, word) => `${n} ${word}${n > 1 ? 's' : ''}`;
 
-// --- Sujets lus et gardés : dans Supabase une fois connecté, sinon dans ce navigateur ---
+// --- Sujets lus et gardés, par compte ---
 
 let user = null;
 const marks = { lu: new Set(), garde: new Set() };
-const local = {
-  load: kind => { try { return new Set(JSON.parse(localStorage.getItem('veille:' + kind)) || []); } catch { return new Set(); } },
-  save: kind => { try { localStorage.setItem('veille:' + kind, JSON.stringify([...marks[kind]])); } catch {} },
-};
 
 async function loadMarks() {
-  if (!user) {
-    marks.lu = local.load('lu');
-    marks.garde = local.load('garde');
-    return;
-  }
   const { data, error } = await db.from('veille_marks').select('topic_id, kind');
   if (error) return console.error(error);
   marks.lu = new Set(data.filter(m => m.kind === 'lu').map(m => m.topic_id));
@@ -42,7 +33,6 @@ async function loadMarks() {
 async function toggleMark(kind, id) {
   const on = !marks[kind].has(id);
   on ? marks[kind].add(id) : marks[kind].delete(id);
-  if (!user) return local.save(kind);
   const { error } = on
     ? await db.from('veille_marks').insert({ topic_id: id, kind })
     : await db.from('veille_marks').delete().match({ topic_id: id, kind });
@@ -117,6 +107,29 @@ const clock = ts => {
   return `${Number(hh)} h ${mm}`;
 };
 
+// Résumé du jour, raccourci à trois lignes si on le préfère (choix gardé dans ce navigateur)
+function showDigest(textContent) {
+  const digest = $('digest'), toggle = $('digest-toggle');
+  let short = true;
+  try { short = localStorage.getItem('veille:resume') !== 'long'; } catch {}
+  const apply = () => {
+    digest.classList.toggle('is-short', short);
+    toggle.textContent = short ? 'Lire tout le résumé' : 'Raccourcir le résumé';
+    toggle.setAttribute('aria-expanded', !short);
+  };
+  digest.textContent = textContent;
+  digest.hidden = false;
+  apply();
+  // Pas de bouton si le résumé tient déjà en trois lignes
+  if (short && digest.scrollHeight <= digest.clientHeight + 1) return digest.classList.remove('is-short');
+  toggle.hidden = false;
+  toggle.addEventListener('click', () => {
+    short = !short;
+    try { localStorage.setItem('veille:resume', short ? 'court' : 'long'); } catch {}
+    apply();
+  });
+}
+
 async function showRecap() {
   const { data: ed, error } = await db.from('veille_editions')
     .select('*').order('edition_date', { ascending: false }).limit(1).maybeSingle();
@@ -131,8 +144,7 @@ async function showRecap() {
   if (tErr) throw tErr;
 
   $('eyebrow').textContent = longDate(ed.edition_date);
-  $('digest').textContent = ed.digest;
-  $('digest').hidden = false;
+  showDigest(ed.digest);
   $('stats').textContent = `${plural(ed.article_count, 'article')} · ${plural(ed.source_count, 'source')} · édition de ${clock(ed.created_at)}`;
   $('stats').hidden = false;
 
@@ -169,7 +181,18 @@ async function showSources() {
   }));
 }
 
-// --- Connexion par code e-mail, réservée au compte existant (comme le Codex) ---
+// --- Connexion par code e-mail, réservée aux adresses invitées (liste veille_invites dans Supabase) ---
+
+function showGate(message, withLogin) {
+  $('eyebrow').textContent = 'Veille privée';
+  const box = h('div', { class: 'gate' }, h('p', {}, message));
+  if (withLogin) {
+    const open = h('button', { type: 'button' }, 'Se connecter');
+    open.addEventListener('click', () => $('login').showModal());
+    box.append(open);
+  }
+  $('content').append(box);
+}
 
 function showAccount() {
   const p = $('account');
@@ -189,8 +212,11 @@ function setupLogin() {
     e.preventDefault();
     err.hidden = true;
     email = emailForm.email.value.trim();
-    const { error } = await db.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
-    if (error) return fail(error.message);
+    // Le compte est créé à la première connexion, si l'adresse est invitée (sinon Supabase refuse)
+    const { error } = await db.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    if (error) return fail(error.status === 429 ? 'Trop de demandes : réessaie dans une minute.'
+      : /invit/i.test(error.message) ? 'Cette adresse n’est pas invitée. Demande à Gabin de t’ajouter.'
+      : error.message);
     emailForm.hidden = true;
     codeForm.hidden = false;
     codeForm.code.focus();
@@ -210,12 +236,16 @@ document.querySelector(`[data-view="${view}"]`)?.setAttribute('aria-current', 'p
 setupLogin();
 ({ data: { user } } = await db.auth.getUser());
 showAccount();
-await loadMarks();
-showSaved();
 try {
-  if (view === 'plus-tard') await showSavedTopics();
-  else if (view === 'sources') await showSources();
-  else await showRecap();
+  if (view === 'sources') await showSources(); // la liste des flux reste publique
+  else if (!user) showGate('La veille est réservée à mes amis. Connecte-toi avec l’adresse que tu m’as donnée.', true);
+  else if (!(await db.rpc('veille_is_member')).data) showGate('Ce compte n’est pas sur la liste des invités.', false);
+  else {
+    await loadMarks();
+    showSaved();
+    if (view === 'plus-tard') await showSavedTopics();
+    else await showRecap();
+  }
 } catch (err) {
   console.error(err);
   $('content').append(empty('Impossible de charger la veille pour le moment.'));
