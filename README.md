@@ -12,15 +12,17 @@ sous la rue médiévale 3D de la taverne, dans le style « Codex Nuit ».
    couvert par un seul bord. Un dernier appel rédige le résumé global.
 3. **Supabase** (le même projet que le Codex) stocke les articles, l'édition du jour et ses sujets.
 4. **Le site** est une page statique (sans build), installable comme une appli, qui lit Supabase avec la clé publique.
-   Il est privé : il faut se connecter (code par e-mail) avec une adresse de la liste `veille_invites`.
+   Il est privé : il faut un compte membre (liste `veille_invites`), avec connexion par code e-mail.
    Les boutons Lu / Plus tard sont enregistrés dans Supabase, pour chaque compte.
 
 ## Inviter un ami
 
-Dans Supabase > Table Editor > `veille_invites`, ajoute une ligne avec son e-mail **en minuscules**
-(ou en SQL : `insert into veille_invites (email) values ('ami@exemple.fr');`).
-Il se connecte ensuite sur le site avec cette adresse : son compte est créé au premier code.
-Pour retirer quelqu'un, supprime sa ligne : il ne voit plus la veille, même connecté.
+Donne-lui le code d'invitation (table `veille_codes`) : il crée son compte sur le site avec son e-mail et ce code,
+puis devient membre automatiquement. Sans le bon code, Supabase refuse la création du compte.
+
+- **Changer le code** : modifie la ligne de `veille_codes` (Table Editor). Les comptes déjà créés gardent leur accès.
+- **Retirer quelqu'un** : supprime sa ligne de `veille_invites` ; il ne voit plus la veille, même connecté.
+- **Ajouter quelqu'un sans code** : ajoute son e-mail en minuscules dans `veille_invites`.
 
 | Fichier | Rôle |
 | --- | --- |

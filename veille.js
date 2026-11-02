@@ -212,10 +212,13 @@ function setupLogin() {
     e.preventDefault();
     err.hidden = true;
     email = emailForm.email.value.trim();
-    // Le compte est créé à la première connexion, si l'adresse est invitée (sinon Supabase refuse)
-    const { error } = await db.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    // Le compte est créé à la première connexion, si le code d'invitation est bon (sinon Supabase refuse)
+    const { error } = await db.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true, data: { code_invitation: emailForm.invite.value.trim() } },
+    });
     if (error) return fail(error.status === 429 ? 'Trop de demandes : réessaie dans une minute.'
-      : /invit/i.test(error.message) ? 'Cette adresse n’est pas invitée. Demande à Gabin de t’ajouter.'
+      : /invit/i.test(error.message) ? 'Code d’invitation incorrect. Demande-le à Gabin.'
       : error.message);
     emailForm.hidden = true;
     codeForm.hidden = false;
@@ -238,7 +241,7 @@ setupLogin();
 showAccount();
 try {
   if (view === 'sources') await showSources(); // la liste des flux reste publique
-  else if (!user) showGate('La veille est réservée à mes amis. Connecte-toi avec l’adresse que tu m’as donnée.', true);
+  else if (!user) showGate('La veille est réservée à mes amis. Pour ta première connexion, il te faut le code d’invitation que je t’ai donné.', true);
   else if (!(await db.rpc('veille_is_member')).data) showGate('Ce compte n’est pas sur la liste des invités.', false);
   else {
     await loadMarks();

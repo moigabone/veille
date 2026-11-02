@@ -242,6 +242,8 @@ a:hover { color: var(--hover); }
 .login h2 { font-family: var(--font-display), serif; font-weight: 700; font-size: 2rem; line-height: 1; margin: 0 0 0.75rem; color: var(--bright); }
 .login p { margin: 0 0 1rem; color: var(--mist); }
 .login label { display: grid; gap: 0.3rem; font-size: 0.8rem; color: var(--ash); }
+.login label + label { margin-top: 0.9rem; }
+.login small { font-size: 0.75rem; color: var(--ash); opacity: 0.8; }
 .login input { font: inherit; color: #fff; background: var(--night); border: 1px solid var(--seam); border-radius: 0; padding: 0.55rem 0.6rem; }
 .login-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
 .login button { font: inherit; font-weight: 600; color: var(--night); background: var(--gilt); border: 1px solid var(--gilt); padding: 0.55rem 1.1rem; cursor: pointer; }

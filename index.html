@@ -54,8 +54,9 @@
 <dialog class="login" id="login">
   <form id="login-email">
     <h2>Connexion</h2>
-    <p>La veille est réservée aux invités : entre ton adresse, tu recevras un code par e-mail.</p>
+    <p>Entre ton adresse : tu recevras un code de connexion par e-mail.</p>
     <label>Adresse e-mail <input type="email" name="email" required autocomplete="email"></label>
+    <label><span>Code d’invitation <small>(première connexion seulement)</small></span> <input name="invite" autocomplete="off" autocapitalize="none"></label>
     <div class="login-actions">
       <button type="button" class="ghost" data-close>Annuler</button>
       <button>Recevoir un code</button>
