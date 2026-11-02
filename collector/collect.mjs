@@ -114,19 +114,21 @@ Ta tâche :
 - Appuie-toi uniquement sur les titres et chapôs fournis. N'invente aucun chiffre ni aucun fait ; si l'information est partielle, reste prudent dans la formulation.
 - Ne recopie pas les phrases des articles : reformule avec tes mots.
 - Dans "items", liste les numéros de tous les articles du sujet, le plus complet d'abord.
-- "note" vaut null, sauf pour signaler un point utile au lecteur. En politique, si un sujet n'est couvert que par des sources d'un même bord, écris-le (par exemple : « Couvert seulement par la presse de droite »).
+- "note" vaut presque toujours null. En politique, si un sujet n'est couvert que par des sources d'un même bord, écris-le (par exemple : « Couvert seulement par la presse de droite »). Ne signale pas qu'un sujet n'a qu'une source : le lecteur voit déjà les sources.
+- Si on te donne des sujets déjà traités dans d'autres thèmes, ne les reprends pas, même sous un autre angle : choisis d'autres sujets.
 - Les sources anglophones doivent aussi être résumées en français.`;
 
-async function summarizeTheme(theme, items) {
+async function summarizeTheme(theme, items, done) {
   const lines = items.map((a, i) =>
     `[${i}] ${a.source}${a.bord ? ` (${a.bord})` : ""} — ${a.title}${a.snippet ? `\n    ${a.snippet}` : ""}`);
+  const already = done.length ? `Sujets déjà traités dans d'autres thèmes :\n${done.map(t => `- ${t.title}`).join("\n")}\n\n` : "";
   const res = await anthropic.beta.messages.parse({
     model: MODEL,
     max_tokens: 16000,
     ...FALLBACK,
     system: SYSTEM,
     output_config: { effort: "medium", format: betaZodOutputFormat(TopicsSchema) },
-    messages: [{ role: "user", content: `Thème : ${THEMES[theme]}\n\n${lines.join("\n")}` }],
+    messages: [{ role: "user", content: `${already}Thème : ${THEMES[theme]}\n\n${lines.join("\n")}` }],
   });
   track(res);
   checkStop(res);
@@ -137,9 +139,13 @@ async function summarizeTheme(theme, items) {
     title: t.title,
     summary: t.summary,
     note: t.note || null,
-    sources: [...new Set(t.items)].filter(i => items[i]).map(i => ({ name: items[i].source, title: items[i].title, url: items[i].url })),
+    sources: firstPerSource([...new Set(t.items)].filter(i => items[i]).map(i => items[i]))
+      .map(a => ({ name: a.source, title: a.title, url: a.url })),
   })).filter(t => t.sources.length);
 }
+
+// Un seul article par média dans un sujet, le premier cité par l'IA
+const firstPerSource = list => list.filter((a, i) => list.findIndex(b => b.source === a.source) === i);
 
 async function writeDigest(topics) {
   const lines = topics.map(t => `- [${THEMES[t.theme]}] ${t.title} : ${t.summary}`);
@@ -194,11 +200,14 @@ const byTheme = Object.keys(THEMES).map(theme => [theme, articles
 console.log(`${articles.length} articles depuis ${WINDOW_HOURS} h :`, byTheme.map(([t, l]) => `${t} ${l.length}`).join(", "));
 if (NO_AI) process.exit(0);
 
+// Les thèmes spécialisés passent d'abord, pour qu'un sujet atterrisse dans le plus précis (un piratage en Cyber
+// plutôt qu'en Tech ou Monde) ; les suivants reçoivent la liste des sujets déjà pris pour ne pas les répéter.
+const ORDER = ["cyber", "ia", "finance", "politique", "eco", "monde", "tech"];
 const topics = [];
-for (const [theme, items] of byTheme) {
+for (const [theme, items] of [...byTheme].sort((a, b) => ORDER.indexOf(a[0]) - ORDER.indexOf(b[0]))) {
   if (!items.length) continue;
   try {
-    topics.push(...await summarizeTheme(theme, items));
+    topics.push(...await summarizeTheme(theme, items, topics));
   } catch (err) {
     console.error(`Thème ${theme} ignoré :`, err.message); // un thème en échec n'empêche pas l'édition
   }
