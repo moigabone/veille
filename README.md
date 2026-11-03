@@ -12,6 +12,8 @@ sous la rue médiévale 3D de la taverne, dans le style « Codex Nuit ».
    et les résume en français, à partir des titres et chapôs seulement. Il signale aussi un sujet politique
    couvert par un seul bord. Un dernier appel rédige le résumé global.
 3. **Supabase** (le même projet que le Codex) stocke les articles, l'édition du jour et ses sujets.
+   Relancer la collecte le même jour remplace l'édition, en reportant les Lu / Plus tard sur les nouveaux sujets
+   (même thème, liens en commun). Les articles bruts sont effacés après 3 mois ; les éditions restent.
 4. **Le site** est une page statique (sans build), installable comme une appli, qui lit Supabase avec la clé publique.
    Il est privé : il faut un compte membre (liste `veille_invites`), avec connexion par code e-mail.
    Les boutons Lu / Plus tard sont enregistrés dans Supabase, pour chaque compte.

@@ -175,7 +175,9 @@ async function save(db, articles, topics, digest) {
   const date = parisDate();
   const themeCounts = {};
   for (const a of articles) themeCounts[a.theme] = (themeCounts[a.theme] ?? 0) + 1;
-  // Relancer la collecte le même jour remplace l'édition (et ses sujets)
+  // Relancer la collecte le même jour remplace l'édition (et ses sujets) : on note d'abord les Lu / Plus tard
+  // pour les reporter sur les nouveaux sujets
+  const oldMarks = await marksOf(db, date);
   await db.from("veille_editions").delete().eq("edition_date", date);
   const { data: edition, error: edErr } = await db.from("veille_editions").insert({
     edition_date: date,
@@ -186,14 +188,53 @@ async function save(db, articles, topics, digest) {
   }).select("id").single();
   if (edErr) throw edErr;
 
-  const { error: topErr } = await db.from("veille_topics").insert(topics.map(t => ({ ...t, edition_id: edition.id })));
+  const { data: saved, error: topErr } = await db.from("veille_topics")
+    .insert(topics.map(t => ({ ...t, edition_id: edition.id }))).select("id, theme, sources");
   if (topErr) throw topErr;
+  await carryMarks(db, oldMarks, saved);
+  await purge(db);
   return date;
+}
+
+// Les Lu / Plus tard de l'édition du jour, avec les liens du sujet marqué
+async function marksOf(db, date) {
+  const { data, error } = await db.from("veille_marks")
+    .select("user_id, kind, created_at, veille_topics!inner(theme, sources, veille_editions!inner(edition_date))")
+    .eq("veille_topics.veille_editions.edition_date", date);
+  if (error) throw error;
+  return data;
+}
+
+// Un ancien sujet correspond au nouveau sujet du même thème qui partage le plus de liens avec lui
+async function carryMarks(db, oldMarks, topics) {
+  const rows = [];
+  for (const m of oldMarks) {
+    const urls = new Set(m.veille_topics.sources.map(s => s.url));
+    let best = null, bestShared = 0;
+    for (const t of topics.filter(t => t.theme === m.veille_topics.theme)) {
+      const shared = t.sources.filter(s => urls.has(s.url)).length;
+      if (shared > bestShared) [best, bestShared] = [t, shared];
+    }
+    if (best) rows.push({ user_id: m.user_id, topic_id: best.id, kind: m.kind, created_at: m.created_at });
+  }
+  if (!rows.length) return;
+  const { error } = await db.from("veille_marks").upsert(rows, { onConflict: "user_id,topic_id,kind", ignoreDuplicates: true });
+  if (error) throw error;
+  console.log(`${rows.length} / ${oldMarks.length} Lu / Plus tard reportés sur la nouvelle édition.`);
+}
+
+// Les articles bruts ne servent qu'à la collecte : au-delà de trois mois, on les efface
+// (les éditions et leurs sujets restent)
+async function purge(db) {
+  const limit = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
+  const { count, error } = await db.from("veille_articles").delete({ count: "exact" }).lt("fetched_at", limit);
+  if (error) throw error;
+  if (count) console.log(`${count} articles de plus de 3 mois supprimés.`);
 }
 
 // --- Programme ---
 
-// Relancer une édition supprime les Lu / Plus tard de ses sujets : le planning de secours ne la refait pas
+// Le planning de secours ne refait pas une édition déjà publiée par le déclencheur de Supabase
 if (process.argv.includes("--si-absente")) {
   const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
   const { count, error } = await db.from("veille_editions").select("id", { count: "exact", head: true }).eq("edition_date", parisDate());
