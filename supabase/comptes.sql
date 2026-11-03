@@ -7,7 +7,7 @@ create table veille_codes (
   code       text primary key,
   created_at timestamptz not null default now()
 );
-insert into veille_codes (code) values ('taverne-2026');  -- le code à donner à tes amis : change-le si tu veux
+insert into veille_codes (code) values ('CHOISIS-TON-CODE');  -- le code à donner à tes amis (il ne doit pas rester dans le dépôt)
 
 create table veille_invites (
   email    text primary key check (email = lower(email)),
