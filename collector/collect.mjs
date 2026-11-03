@@ -1,6 +1,7 @@
 // Collecte du matin : flux RSS → sujets regroupés et résumés par Claude → édition du jour dans Supabase.
 // Variables : ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (VEILLE_MODEL en option).
-// `node collect.mjs --essai` affiche le résultat sans rien écrire ; `--sans-ia` s'arrête après les flux.
+// `node collect.mjs --essai` affiche le résultat sans rien écrire ; `--sans-ia` s'arrête après les flux ;
+// `--si-absente` ne fait rien si l'édition du jour existe déjà.
 import { readFileSync } from "node:fs";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
@@ -191,6 +192,17 @@ async function save(db, articles, topics, digest) {
 }
 
 // --- Programme ---
+
+// Relancer une édition supprime les Lu / Plus tard de ses sujets : le planning de secours ne la refait pas
+if (process.argv.includes("--si-absente")) {
+  const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
+  const { count, error } = await db.from("veille_editions").select("id", { count: "exact", head: true }).eq("edition_date", parisDate());
+  if (error) throw error;
+  if (count) {
+    console.log(`Édition du ${parisDate()} déjà publiée, rien à faire.`);
+    process.exit(0);
+  }
+}
 
 const articles = await collect();
 const byTheme = Object.keys(THEMES).map(theme => [theme, articles

@@ -5,7 +5,8 @@ sous la rue médiévale 3D de la taverne, dans le style « Codex Nuit ».
 
 ## Fonctionnement
 
-1. **Chaque matin** (GitHub Actions, 5 h 30 UTC), `collector/collect.mjs` lit les flux RSS de `sources.json`
+1. **Chaque matin** (5 h 30 UTC, lancée par Supabase pg_cron via `supabase/declencheur.sql`, avec le planning
+   GitHub Actions en secours car il arrive souvent en retard), `collector/collect.mjs` lit les flux RSS de `sources.json`
    et garde les articles des dernières 26 h, sans doublons.
 2. **Claude** regroupe, thème par thème, les articles qui parlent du même sujet, garde les 3 à 5 plus importants
    et les résume en français, à partir des titres et chapôs seulement. Il signale aussi un sujet politique

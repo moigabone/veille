@@ -27,7 +27,9 @@ jobs:
           cache: npm
           cache-dependency-path: collector/package-lock.json
       - run: npm ci
-      - run: node collect.mjs ${{ inputs.essai && '--essai' || '' }}
+      # Le déclenchement planifié de GitHub arrive parfois avec des heures de retard : Supabase (pg_cron) lance
+      # la collecte à l'heure, et ce planning ne sert plus que de secours s'il n'y a pas encore d'édition du jour.
+      - run: node collect.mjs ${{ inputs.essai && '--essai' || '' }} ${{ github.event_name == 'schedule' && '--si-absente' || '' }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
